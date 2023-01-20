@@ -50,7 +50,7 @@ int main() {
     return 1;
   }
 
-  Shader shader("vertex.vert", "fragment.frag");
+  Shader shader{"transformations.vert", "transformations.frag"};
 
   const std::array vertices{
       // positions        // texture coords
@@ -157,16 +157,14 @@ int main() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
 
-    glm::mat4 transform(1.0F);
-    transform = glm::translate(transform, {0.5F, -0.5F, 0.0F});
-    transform = glm::rotate(transform, static_cast<float>(glfwGetTime()),
-                            {0.0F, 0.0F, 1.0F});
-
     shader.use();
-    const int transform_location =
-        glGetUniformLocation(shader.id_, "transform");
-    glUniformMatrix4fv(transform_location, 1, GL_FALSE,
-                       glm::value_ptr(transform));
+    glUniformMatrix4fv(
+        glGetUniformLocation(shader.id_, "transform"), 1, GL_FALSE,
+        glm::value_ptr(
+            glm::translate(glm::identity<glm::mat4>(), {0.5F, -0.5F, 0.0F}) *
+            glm::rotate(glm::identity<glm::mat4>(),
+                        static_cast<float>(glfwGetTime()),
+                        {0.0F, 0.0F, 1.0F})));
 
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

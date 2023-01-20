@@ -52,7 +52,7 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
-  Shader shader("vertex.vert", "fragment.frag");
+  Shader shader{"coordinate_systems.vert", "coordinate_systems.frag"};
 
   const std::array vertices{
       -0.5F, -0.5F, -0.5F, 0.0F, 0.0F, 0.5F,  -0.5F, -0.5F, 1.0F, 0.0F,

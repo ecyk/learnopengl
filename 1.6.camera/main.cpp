@@ -70,7 +70,7 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
-  Shader shader("vertex.vert", "fragment.frag");
+  Shader shader{"camera.vert", "camera.frag"};
 
   const std::array vertices{
       -0.5F, -0.5F, -0.5F, 0.0F, 0.0F, 0.5F,  -0.5F, -0.5F, 1.0F, 0.0F,
@@ -194,7 +194,6 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, texture2);
 
     shader.use();
-
     shader.set_mat4("view", camera.calculate_view_matrix());
     shader.set_mat4("projection",
                     glm::perspective(glm::radians(camera.zoom_),

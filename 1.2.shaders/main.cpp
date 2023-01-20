@@ -45,7 +45,7 @@ int main() {
     return 1;
   }
 
-  Shader shader("vertex.vert", "fragment.frag");
+  Shader shader{"shaders.vert", "shaders.frag"};
 
   const std::array vertices{
       // positions         // colors
