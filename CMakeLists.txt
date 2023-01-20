@@ -30,13 +30,14 @@ function(make_executable TARGET)
     target_link_libraries(${TARGET} common glfw)
 
     file(GLOB SHADERS ${TARGET}/*.vert ${TARGET}/*.frag)
-    if(SHADERS)
+    foreach(SHADER ${SHADERS})
+        get_filename_component(SHADER_NAME ${SHADER} NAME)
         add_custom_command(TARGET ${TARGET} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            ${SHADERS} ${CMAKE_SOURCE_DIR}/bin/${TARGET}
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${SHADER} ${CMAKE_SOURCE_DIR}/bin/${TARGET}/${SHADER_NAME}
         )
-    endif()
-    
+    endforeach()
+
     add_custom_command(TARGET ${TARGET} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E create_symlink
         ${CMAKE_SOURCE_DIR}/resources ${CMAKE_SOURCE_DIR}/bin/${TARGET}/resources
@@ -50,3 +51,5 @@ make_executable(1.3.textures)
 make_executable(1.4.transformations)
 make_executable(1.5.coordinate_systems)
 make_executable(1.6.camera)
+
+make_executable(2.0.colors)
