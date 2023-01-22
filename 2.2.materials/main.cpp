@@ -72,7 +72,7 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
-  Shader shader{"basic_lighting.vert", "basic_lighting.frag"};
+  Shader shader{"materials.vert", "materials.frag"};
   Shader light_cube_shader{"light_cube.vert", "light_cube.frag"};
 
   const std::array vertices{
@@ -142,17 +142,30 @@ int main() {
 
     process_input(window);
 
-    light_pos.x = static_cast<float>(sin(glfwGetTime()));
-    light_pos.z = static_cast<float>(cos(glfwGetTime()));
+    // light_pos.x = static_cast<float>(sin(glfwGetTime()));
+    // light_pos.z = static_cast<float>(cos(glfwGetTime()));
 
     glClearColor(0.25F, 0.25F, 0.25F, 1.0F);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shader.use();
-    shader.set_vec3("lightPos", light_pos);
+    shader.set_vec3("light.position", light_pos);
     shader.set_vec3("viewPos", camera.position_);
-    shader.set_vec3("objectColor", {1.0F, 0.5F, 0.31F});
-    shader.set_vec3("lightColor", {1.0F, 1.0F, 1.0F});
+
+    const glm::vec3 light_color{static_cast<float>(sin(glfwGetTime() * 2.0)),
+                                static_cast<float>(sin(glfwGetTime() * 0.7)),
+                                static_cast<float>(sin(glfwGetTime() * 1.3))};
+
+    const glm::vec3 diffuse_color = light_color * 0.5F;
+    const glm::vec3 ambient_color = diffuse_color * 0.2F;
+    shader.set_vec3("light.ambient", ambient_color);
+    shader.set_vec3("light.diffuse", diffuse_color);
+    shader.set_vec3("light.specular", {1.0F, 1.0F, 1.0F});
+
+    shader.set_vec3("material.ambient", {1.0F, 0.5F, 0.31F});
+    shader.set_vec3("material.diffuse", {1.0F, 0.5F, 0.31F});
+    shader.set_vec3("material.specular", {0.5F, 0.5F, 0.5F});
+    shader.set_float("material.shininess", 32.0F);
 
     const glm::mat4 view = camera.calculate_view_matrix();
     const glm::mat4 projection = glm::perspective(
