@@ -53,3 +53,4 @@ make_executable(1.5.coordinate_systems)
 make_executable(1.6.camera)
 
 make_executable(2.0.colors)
+make_executable(2.1.basic_lighting)
