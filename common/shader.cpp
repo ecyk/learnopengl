@@ -5,6 +5,7 @@
 #include <cassert>
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 Shader::Shader(const std::filesystem::path& vertex_path,
                const std::filesystem::path& fragment_path) {
@@ -21,23 +22,43 @@ Shader::Shader(const std::filesystem::path& vertex_path,
   const std::string vertex_code = read_file(vertex_path);
   const std::string fragment_code = read_file(fragment_path);
 
-  auto create_shader = [](const char* shader_code, GLenum type) {
+  auto create_shader = [](const char* shader_code, GLenum type,
+                          std::string& buffer) {
     const unsigned int shader = glCreateShader(type);
     glShaderSource(shader, 1, &shader_code, nullptr);
     glCompileShader(shader);
+
+    int success = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (success == 0) {
+      glGetShaderInfoLog(shader, static_cast<int>(buffer.size()), nullptr,
+                         buffer.data());
+      std::cerr << buffer << '\n';
+    }
     return shader;
   };
 
+  std::string buffer;
+  buffer.resize(1024);
+
   const unsigned int vertex_shader =
-      create_shader(vertex_code.c_str(), GL_VERTEX_SHADER);
+      create_shader(vertex_code.c_str(), GL_VERTEX_SHADER, buffer);
   const unsigned int fragment_shader =
-      create_shader(fragment_code.c_str(), GL_FRAGMENT_SHADER);
+      create_shader(fragment_code.c_str(), GL_FRAGMENT_SHADER, buffer);
 
   const unsigned int program = glCreateProgram();
 
   glAttachShader(program, vertex_shader);
   glAttachShader(program, fragment_shader);
   glLinkProgram(program);
+
+  int success = 0;
+  glGetProgramiv(program, GL_LINK_STATUS, &success);
+  if (success == 0) {
+    glGetProgramInfoLog(program, static_cast<int>(buffer.size()), nullptr,
+                        buffer.data());
+    std::cerr << buffer << '\n';
+  }
 
   glDeleteShader(vertex_shader);
   glDeleteShader(fragment_shader);
