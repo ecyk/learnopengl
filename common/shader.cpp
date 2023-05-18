@@ -66,7 +66,24 @@ Shader::Shader(const std::filesystem::path& vertex_path,
   id_ = program;
 }
 
-void Shader::use() { glUseProgram(id_); }
+Shader::~Shader() {
+  if (id_ != 0) {
+    glDeleteProgram(id_);
+    id_ = 0;
+  }
+}
+
+Shader::Shader(Shader&& other) noexcept : id_{std::exchange(other.id_, 0)} {}
+
+Shader& Shader::operator=(Shader&& other) noexcept {
+  if (this != &other) {
+    id_ = std::exchange(other.id_, 0);
+  }
+
+  return *this;
+}
+
+void Shader::use() const { glUseProgram(id_); }
 
 void Shader::set_bool(const std::string& name, bool value) const {
   glUniform1i(glGetUniformLocation(id_, name.c_str()), static_cast<int>(value));

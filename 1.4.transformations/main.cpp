@@ -159,7 +159,7 @@ int main() {
 
     shader.use();
     glUniformMatrix4fv(
-        glGetUniformLocation(shader.id_, "transform"), 1, GL_FALSE,
+        glGetUniformLocation(shader.get_id(), "transform"), 1, GL_FALSE,
         glm::value_ptr(
             glm::translate(glm::identity<glm::mat4>(), {0.5F, -0.5F, 0.0F}) *
             glm::rotate(glm::identity<glm::mat4>(),
@@ -178,8 +178,6 @@ int main() {
   glDeleteBuffers(1, &ebo);
   glDeleteTextures(1, &texture1);
   glDeleteTextures(1, &texture2);
-  glDeleteProgram(shader.id_);
-  shader.id_ = 0;
 
   glfwTerminate();
   return 0;

@@ -70,7 +70,7 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
-  Shader shader{"camera.vert", "camera.frag"};
+  const Shader shader{"camera.vert", "camera.frag"};
 
   const std::array vertices{
       -0.5F, -0.5F, -0.5F, 0.0F, 0.0F, 0.5F,  -0.5F, -0.5F, 1.0F, 0.0F,
@@ -219,8 +219,6 @@ int main() {
   glDeleteBuffers(1, &vbo);
   glDeleteTextures(1, &texture1);
   glDeleteTextures(1, &texture2);
-  glDeleteProgram(shader.id_);
-  shader.id_ = 0;
 
   glfwTerminate();
   return 0;
@@ -231,7 +229,6 @@ void process_input(GLFWwindow* window) {
     glfwSetWindowShouldClose(window, 1);
   }
 
-  const float camera_speed = 0.05F;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     camera.process_keyboard_input(CameraMovement::Forward, delta_time);
   }

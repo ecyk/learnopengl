@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 
 project(learnopengl LANGUAGES CXX)
 
@@ -56,3 +56,4 @@ make_executable(2.0.colors)
 make_executable(2.1.basic_lighting)
 make_executable(2.2.materials)
 make_executable(2.3.lighting_maps)
+make_executable(2.4.light_casters)

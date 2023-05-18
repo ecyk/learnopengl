@@ -72,8 +72,8 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
-  Shader shader{"materials.vert", "materials.frag"};
-  Shader light_cube_shader{"light_cube.vert", "light_cube.frag"};
+  const Shader shader{"materials.vert", "materials.frag"};
+  const Shader light_cube_shader{"light_cube.vert", "light_cube.frag"};
 
   const std::array vertices{
       -0.5F, -0.5F, -0.5F, 0.0F,  0.0F,  -1.0F, 0.5F,  -0.5F, -0.5F,
@@ -196,8 +196,6 @@ int main() {
   glDeleteVertexArrays(1, &cube_vao);
   glDeleteVertexArrays(1, &light_cube_vao);
   glDeleteBuffers(1, &vbo);
-  glDeleteProgram(shader.id_);
-  shader.id_ = 0;
 
   glfwTerminate();
   return 0;
@@ -208,7 +206,6 @@ void process_input(GLFWwindow* window) {
     glfwSetWindowShouldClose(window, 1);
   }
 
-  const float camera_speed = 0.05F;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     camera.process_keyboard_input(CameraMovement::Forward, delta_time);
   }

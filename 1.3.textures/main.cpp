@@ -171,8 +171,6 @@ int main() {
   glDeleteBuffers(1, &ebo);
   glDeleteTextures(1, &texture1);
   glDeleteTextures(1, &texture2);
-  glDeleteProgram(shader.id_);
-  shader.id_ = 0;
 
   glfwTerminate();
   return 0;

@@ -95,8 +95,6 @@ int main() {
 
   glDeleteVertexArrays(1, &vao);
   glDeleteBuffers(1, &vbo);
-  glDeleteProgram(shader.id_);
-  shader.id_ = 0;
 
   glfwTerminate();
   return 0;

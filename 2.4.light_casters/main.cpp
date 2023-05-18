@@ -73,7 +73,7 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
-  const Shader shader{"lighting_maps.vert", "lighting_maps.frag"};
+  const Shader shader{"light_casters.vert", "light_casters.frag"};
   const Shader light_cube_shader{"light_cube.vert", "light_cube.frag"};
 
   const std::array vertices{
@@ -112,6 +112,13 @@ int main() {
       1.0F,  0.0F,  1.0F,  0.0F,  0.5F,  0.5F,  0.5F,  0.0F,  1.0F,  0.0F,
       1.0F,  0.0F,  -0.5F, 0.5F,  0.5F,  0.0F,  1.0F,  0.0F,  0.0F,  0.0F,
       -0.5F, 0.5F,  -0.5F, 0.0F,  1.0F,  0.0F,  0.0F,  1.0F};
+
+  const std::array cube_positions = {
+      glm::vec3{0.0F, 0.0F, 0.0F},    glm::vec3{2.0F, 5.0F, -15.0F},
+      glm::vec3{-1.5F, -2.2F, -2.5F}, glm::vec3{-3.8F, -2.0F, -12.3F},
+      glm::vec3{2.4F, -0.4F, -3.5F},  glm::vec3{-1.7F, 3.0F, -7.5F},
+      glm::vec3{1.3F, -2.0F, -2.5F},  glm::vec3{1.5F, 2.0F, -2.5F},
+      glm::vec3{1.5F, 0.2F, -1.5F},   glm::vec3{-1.3F, 1.0F, -1.5F}};
 
   unsigned int cube_vao = 0;
   glGenVertexArrays(1, &cube_vao);
@@ -162,27 +169,33 @@ int main() {
 
     process_input(window);
 
-    light_pos.x = static_cast<float>(sin(glfwGetTime()));
-    light_pos.z = static_cast<float>(cos(glfwGetTime()));
+    // light_pos.x = static_cast<float>(sin(glfwGetTime()));
+    // light_pos.z = static_cast<float>(cos(glfwGetTime()));
 
     glClearColor(0.25F, 0.25F, 0.25F, 1.0F);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shader.use();
-    shader.set_vec3("light.position", light_pos);
     shader.set_vec3("viewPos", camera.position_);
+    shader.set_float("material.shininess", 32.0F);
+
+    shader.set_vec3("light.position", camera.position_);
+    shader.set_vec3("light.direction", camera.front_);
+    shader.set_float("light.cutOff", glm::cos(glm::radians(12.5F)));
+    shader.set_float("light.outerCutOff", glm::cos(glm::radians(17.5F)));
 
     shader.set_vec3("light.ambient", {0.2F, 0.2F, 0.2F});
     shader.set_vec3("light.diffuse", {0.5F, 0.5F, 0.5F});
     shader.set_vec3("light.specular", {1.0F, 1.0F, 1.0F});
 
-    shader.set_float("material.shininess", 64.0F);
+    shader.set_float("light.constant", 1.0F);
+    shader.set_float("light.linear", 0.09F);
+    shader.set_float("light.quadratic", 0.032F);
 
     const glm::mat4 view = camera.calculate_view_matrix();
     const glm::mat4 projection = glm::perspective(
         glm::radians(camera.zoom_), 800.0F / 600.0F, 0.1F, 100.0F);
 
-    shader.set_mat4("model", glm::identity<glm::mat4>());
     shader.set_mat4("view", view);
     shader.set_mat4("projection", projection);
 
@@ -193,18 +206,13 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, specular_map);
 
     glBindVertexArray(cube_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    light_cube_shader.use();
-    light_cube_shader.set_mat4(
-        "model", glm::translate(glm::identity<glm::mat4>(), light_pos) *
-                     glm::scale(glm::identity<glm::mat4>(),
-                                glm::vec3{0.2F, 0.2F, 0.2F}));
-    light_cube_shader.set_mat4("view", view);
-    light_cube_shader.set_mat4("projection", projection);
-
-    glBindVertexArray(light_cube_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    for (int i = 0; i < 10; i++) {
+      shader.set_mat4("model",
+                      glm::rotate(glm::translate(glm::identity<glm::mat4>(),
+                                                 cube_positions[i]),
+                                  20.0F * i, {1.0F, 0.3F, 0.5F}));
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
     glfwSwapBuffers(window);
     glfwPollEvents();
