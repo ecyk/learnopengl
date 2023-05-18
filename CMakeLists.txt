@@ -5,6 +5,7 @@ project(learnopengl LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(assimp CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -16,7 +17,7 @@ target_include_directories(common
         ${CMAKE_SOURCE_DIR}/common
         ${CMAKE_SOURCE_DIR}/external/include
 )
-target_link_libraries(common glm::glm)
+target_link_libraries(common glm::glm assimp::assimp)
 
 function(make_executable TARGET)
     file(GLOB SOURCES ${TARGET}/*.cpp)
@@ -58,3 +59,4 @@ make_executable(2.2.materials)
 make_executable(2.3.lighting_maps)
 make_executable(2.4.light_casters)
 make_executable(2.5.multiple_lights)
+make_executable(3.0.model_loading)
