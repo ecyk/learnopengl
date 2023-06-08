@@ -63,3 +63,4 @@ make_executable(2.5.multiple_lights)
 make_executable(3.0.model_loading)
 
 make_executable(4.0.depth_testing)
+make_executable(4.1.stencil_testing)
