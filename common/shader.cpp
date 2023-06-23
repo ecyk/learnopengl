@@ -2,17 +2,13 @@
 
 #include <glad/gl.h>
 
-#include <cassert>
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-Shader::Shader(const std::filesystem::path& vertex_path,
-               const std::filesystem::path& fragment_path) {
-  assert(vertex_path.extension() == ".vert" &&
-         fragment_path.extension() == ".frag");
-
-  auto read_file = [](const std::filesystem::path& path) {
+Shader::Shader(const std::string& vertex_path,
+               const std::string& fragment_path) {
+  auto read_file = [](const std::string& path) {
     std::ifstream file{path};
     file.exceptions(std::ifstream::badbit | std::ifstream::failbit);
     return std::string{std::istreambuf_iterator<char>{file},
@@ -60,6 +56,9 @@ Shader::Shader(const std::filesystem::path& vertex_path,
     std::cerr << buffer << '\n';
   }
 
+  assert(vertex_shader > 0 && fragment_shader > 0 &&
+         "Failed to compile shader.");
+
   glDeleteShader(vertex_shader);
   glDeleteShader(fragment_shader);
 
@@ -67,20 +66,8 @@ Shader::Shader(const std::filesystem::path& vertex_path,
 }
 
 Shader::~Shader() {
-  if (id_ != 0) {
-    glDeleteProgram(id_);
-    id_ = 0;
-  }
-}
-
-Shader::Shader(Shader&& other) noexcept : id_{std::exchange(other.id_, 0)} {}
-
-Shader& Shader::operator=(Shader&& other) noexcept {
-  if (this != &other) {
-    id_ = std::exchange(other.id_, 0);
-  }
-
-  return *this;
+  assert(id_ > 0 && "Invalid shader id.");
+  glDeleteProgram(id_);
 }
 
 void Shader::use() const { glUseProgram(id_); }

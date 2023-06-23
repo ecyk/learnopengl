@@ -2,13 +2,10 @@
 #include <GLFW/glfw3.h>
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 #include <array>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 #include "camera.hpp"

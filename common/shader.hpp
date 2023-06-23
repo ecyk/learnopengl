@@ -1,18 +1,19 @@
 #pragma once
 
-#include <filesystem>
 #include <glm/glm.hpp>
+#include <string_view>
 
 class Shader {
  public:
-  Shader(const std::filesystem::path& vertex_path,
-         const std::filesystem::path& fragment_path);
-  ~Shader();
+  Shader(const std::string& vertex_path, const std::string& fragment_path);
 
   Shader(const Shader&) = delete;
   Shader& operator=(const Shader&) = delete;
-  Shader(Shader&& other) noexcept;
-  Shader& operator=(Shader&& other) noexcept;
+
+  Shader(Shader&&) = default;
+  Shader& operator=(Shader&&) = default;
+
+  ~Shader();
 
   void use() const;
 

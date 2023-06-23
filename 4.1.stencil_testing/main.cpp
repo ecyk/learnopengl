@@ -2,7 +2,6 @@
 #include <GLFW/glfw3.h>
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
-#include <stb_image.h>
 
 #include <array>
 #include <glm/glm.hpp>
@@ -148,11 +147,8 @@ int main() {
                         (const void*)(3 * sizeof(float)));
   glBindVertexArray(0);
 
-  Texture cube_texture;
-  cube_texture.load_from_file("resources/textures/marble.jpg");
-
-  Texture plane_texture;
-  plane_texture.load_from_file("resources/textures/metal.png");
+  const Texture cube_texture{"resources/textures/marble.jpg"};
+  const Texture plane_texture{"resources/textures/metal.png"};
 
   shader.use();
   shader.set_int("texture1", 0);
@@ -184,7 +180,7 @@ int main() {
 
     glStencilMask(0x00);
     glBindVertexArray(plane_vao);
-    glBindTexture(GL_TEXTURE_2D, plane_texture.id);
+    plane_texture.bind();
     shader.set_mat4("model", glm::mat4{1.0F});
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
@@ -193,7 +189,7 @@ int main() {
     glStencilMask(0xFF);
     glBindVertexArray(cube_vao);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, cube_texture.id);
+    cube_texture.bind();
     model = glm::translate(model, glm::vec3{-1.0F, 0.0F, -1.0F});
     shader.set_mat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -208,7 +204,7 @@ int main() {
     shader_single_color.use();
     const float scale = 1.1F;
     glBindVertexArray(cube_vao);
-    glBindTexture(GL_TEXTURE_2D, cube_texture.id);
+    cube_texture.bind();
     model = glm::mat4{1.0F};
     model = glm::translate(model, glm::vec3{-1.0F, 0.0F, -1.0F});
     model = glm::scale(model, glm::vec3{scale, scale, scale});

@@ -4,7 +4,6 @@
 #include <glad/gl.h>
 #include <stb_image.h>
 
-#include <array>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
@@ -67,7 +66,7 @@ int main() {
     return 1;
   }
 
-  stbi_set_flip_vertically_on_load(true);
+  stbi_set_flip_vertically_on_load(1);
 
   glEnable(GL_DEPTH_TEST);
 

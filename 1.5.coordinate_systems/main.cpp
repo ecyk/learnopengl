@@ -2,16 +2,15 @@
 #include <GLFW/glfw3.h>
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include <array>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 #include "shader.hpp"
+#include "texture.hpp"
 
 void process_input(GLFWwindow* window);
 
@@ -108,53 +107,10 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  unsigned int texture1 = 0;
-  glGenTextures(1, &texture1);
-  glBindTexture(GL_TEXTURE_2D, texture1);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  int width = 0;
-  int height = 0;
-  int nr_channels = 0;
-
   stbi_set_flip_vertically_on_load(1);
 
-  unsigned char* data = stbi_load("resources/textures/container.jpg", &width,
-                                  &height, &nr_channels, 0);
-  if (data != nullptr) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cerr << "Failed to load texture\n";
-  }
-
-  stbi_image_free(data);
-
-  unsigned int texture2 = 0;
-  glGenTextures(1, &texture2);
-  glBindTexture(GL_TEXTURE_2D, texture2);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  data = stbi_load("resources/textures/awesomeface.png", &width, &height,
-                   &nr_channels, 0);
-  if (data != nullptr) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Failed to load texture\n";
-  }
-
-  stbi_image_free(data);
+  const Texture texture1{"resources/textures/container.jpg"};
+  const Texture texture2{"resources/textures/awesomeface.png"};
 
   shader.use();
   shader.set_int("texture1", 0);
@@ -173,9 +129,9 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    texture1.bind();
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
+    texture2.bind();
 
     shader.use();
     shader.set_mat4("view", view);
@@ -198,8 +154,6 @@ int main() {
 
   glDeleteVertexArrays(1, &vao);
   glDeleteBuffers(1, &vbo);
-  glDeleteTextures(1, &texture1);
-  glDeleteTextures(1, &texture2);
 
   glfwTerminate();
   return 0;

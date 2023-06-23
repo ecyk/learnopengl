@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "shader.hpp"
@@ -14,7 +15,7 @@ struct Vertex {
 class Mesh {
  public:
   Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices,
-       std::vector<Texture> textures);
+       std::vector<std::shared_ptr<Texture>> textures);
 
   void draw(Shader& shader) const;
 
@@ -25,5 +26,5 @@ class Mesh {
 
   std::vector<Vertex> vertices_;
   std::vector<unsigned int> indices_;
-  std::vector<Texture> textures_;
+  std::vector<std::shared_ptr<Texture>> textures_;
 };

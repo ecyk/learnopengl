@@ -5,7 +5,7 @@
 #include <string>
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices,
-           std::vector<Texture> textures)
+           std::vector<std::shared_ptr<Texture>> textures)
     : vertices_{std::move(vertices)},
       indices_{std::move(indices)},
       textures_{std::move(textures)} {
@@ -22,24 +22,25 @@ void Mesh::draw(Shader& shader) const {
   for (int i = 0; i < textures_.size(); i++) {
     glActiveTexture(GL_TEXTURE0 + i);
 
-    switch (textures_[i].type) {
-      case Texture::Type::DIFFUSE:
+    switch (textures_[i]->get_type()) {
+      case Texture::Type::None:
+        assert(false && "Unknown texture type.");
+      case Texture::Type::Diffuse:
         buffer = "material.texture_diffuse" + std::to_string(diffuse++);
         break;
-      case Texture::Type::SPECULAR:
+      case Texture::Type::Specular:
         buffer = "material.texture_specular" + std::to_string(specular++);
-        break;
-      default:
         break;
     }
 
     shader.set_int(buffer, i);
-    glBindTexture(GL_TEXTURE_2D, textures_[i].id);
+    textures_[i]->bind();
   }
   glActiveTexture(GL_TEXTURE0);
 
   glBindVertexArray(vao_);
-  glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices_.size()),
+                 GL_UNSIGNED_INT, nullptr);
   glBindVertexArray(0);
 }
 
@@ -50,12 +51,13 @@ void Mesh::setup() {
 
   glBindVertexArray(vao_);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-
-  glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex),
+  glBufferData(GL_ARRAY_BUFFER,
+               static_cast<GLsizeiptr>(vertices_.size() * sizeof(Vertex)),
                vertices_.data(), GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int),
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               static_cast<GLsizeiptr>(indices_.size() * sizeof(unsigned int)),
                indices_.data(), GL_STATIC_DRAW);
 
   glEnableVertexAttribArray(0);

@@ -174,14 +174,9 @@ int main() {
       glm::vec3{0.0F, 0.0F, 0.7F}, glm::vec3{-0.3F, 0.0F, -2.3F},
       glm::vec3{0.5F, 0.0F, -0.6F}};
 
-  Texture cube_texture;
-  cube_texture.load_from_file("resources/textures/marble.jpg");
-
-  Texture plane_texture;
-  plane_texture.load_from_file("resources/textures/metal.png");
-
-  Texture transparent_texture;
-  transparent_texture.load_from_file("resources/textures/window.png");
+  const Texture cube_texture{"resources/textures/marble.jpg"};
+  const Texture plane_texture{"resources/textures/metal.png"};
+  const Texture transparent_texture{"resources/textures/window.png"};
 
   shader.use();
   shader.set_int("texture1", 0);
@@ -213,7 +208,7 @@ int main() {
 
     glBindVertexArray(cube_vao);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, cube_texture.id);
+    cube_texture.bind();
     model = glm::translate(model, glm::vec3{-1.0F, 0.0F, -1.0F});
     shader.set_mat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -223,13 +218,13 @@ int main() {
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glBindVertexArray(plane_vao);
-    glBindTexture(GL_TEXTURE_2D, plane_texture.id);
+    plane_texture.bind();
     model = glm::mat4{1.0F};
     shader.set_mat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glBindVertexArray(transparent_vao);
-    glBindTexture(GL_TEXTURE_2D, transparent_texture.id);
+    transparent_texture.bind();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {

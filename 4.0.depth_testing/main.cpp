@@ -2,7 +2,6 @@
 #include <GLFW/glfw3.h>
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
-#include <stb_image.h>
 
 #include <array>
 #include <glm/glm.hpp>
@@ -10,7 +9,6 @@
 #include <iostream>
 
 #include "camera.hpp"
-#include "model.hpp"
 #include "shader.hpp"
 
 float delta_time{0.0F};

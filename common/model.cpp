@@ -2,20 +2,14 @@
 
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <glad/gl.h>
 
 #include <assimp/Importer.hpp>
+#include <filesystem>
 #include <iostream>
 
-Model::Model(const std::filesystem::path& path)
-    : directory_{path.parent_path().string()} {
+Model::Model(const std::string& path)
+    : directory_{std::filesystem::path{path}.parent_path().string()} {
   load_model(path);
-}
-
-Model::~Model() {
-  for (const auto& texture : loaded_textures_) {
-    glDeleteTextures(1, &texture.id);
-  }
 }
 
 void Model::draw(Shader& shader) const {
@@ -24,10 +18,10 @@ void Model::draw(Shader& shader) const {
   }
 }
 
-void Model::load_model(const std::filesystem::path& path) {
+void Model::load_model(const std::string& path) {
   Assimp::Importer importer;
-  const aiScene* scene = importer.ReadFile(
-      path.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
+  const aiScene* scene =
+      importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
   if ((scene == nullptr) ||
       ((scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) != 0U) ||
@@ -53,7 +47,7 @@ void Model::process_node(aiNode* node, const aiScene* scene) {
 Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene) {
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
-  std::vector<Texture> textures;
+  std::vector<std::shared_ptr<Texture>> textures;
 
   for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
     Vertex vertex{};
@@ -79,11 +73,11 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene) {
 
   if (mesh->mMaterialIndex >= 0) {
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-    std::vector<Texture> diffuse_maps =
+    std::vector<std::shared_ptr<Texture>> diffuse_maps =
         load_material_textures(material, aiTextureType_DIFFUSE);
     textures.insert(textures.end(), diffuse_maps.begin(), diffuse_maps.end());
 
-    std::vector<Texture> specular_maps =
+    std::vector<std::shared_ptr<Texture>> specular_maps =
         load_material_textures(material, aiTextureType_SPECULAR);
     textures.insert(textures.end(), specular_maps.begin(), specular_maps.end());
   }
@@ -91,34 +85,35 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene) {
   return {vertices, indices, textures};
 }
 
-std::vector<Texture> Model::load_material_textures(aiMaterial* material,
-                                                   aiTextureType type) {
-  std::vector<Texture> textures;
+std::vector<std::shared_ptr<Texture>> Model::load_material_textures(
+    aiMaterial* material, aiTextureType type) {
+  std::vector<std::shared_ptr<Texture>> textures;
   for (unsigned int i = 0; i < material->GetTextureCount(type); i++) {
     aiString string;
     material->GetTexture(type, i, &string);
 
     if (auto it = std::find_if(loaded_textures_.begin(), loaded_textures_.end(),
-                               [&](const Texture& texture) {
-                                 return texture.filename == string.C_Str();
+                               [&](const std::shared_ptr<Texture>& texture) {
+                                 return texture->get_filename() ==
+                                        string.C_Str();
                                });
         it != loaded_textures_.end()) {
       textures.push_back(*it);
       continue;
     }
 
-    Texture texture;
-    texture.load_from_file(directory_ + '/' + std::string{string.C_Str()});
+    auto texture{std::make_shared<Texture>(directory_ + '/' +
+                                           std::string{string.C_Str()})};
 
     switch (type) {
       case aiTextureType_DIFFUSE:
-        texture.type = Texture::Type::DIFFUSE;
+        texture->set_type(Texture::Type::Diffuse);
         break;
       case aiTextureType_SPECULAR:
-        texture.type = Texture::Type::SPECULAR;
+        texture->set_type(Texture::Type::Specular);
         break;
       default:
-        break;
+        assert(false && "Unknown texture type.");
     }
 
     textures.push_back(texture);

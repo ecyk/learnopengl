@@ -2,6 +2,7 @@
 
 #include <assimp/material.h>
 
+#include <memory>
 #include <unordered_map>
 
 #include "mesh.hpp"
@@ -13,25 +14,18 @@ struct aiScene;
 
 class Model {
  public:
-  explicit Model(const std::filesystem::path& path);
-  ~Model();
-
-  Model(const Model&) = delete;
-  Model& operator=(const Model&) = delete;
-  Model(Model&& other) = default;
-  Model& operator=(Model&& other) = default;
+  explicit Model(const std::string& path);
 
   void draw(Shader& shader) const;
 
  private:
-  std::vector<Texture> loaded_textures_;
+  std::vector<std::shared_ptr<Texture>> loaded_textures_;
   std::vector<Mesh> meshes_;
-
   std::string directory_;
 
-  void load_model(const std::filesystem::path& path);
+  void load_model(const std::string& path);
   void process_node(aiNode* node, const aiScene* scene);
   Mesh process_mesh(aiMesh* mesh, const aiScene* scene);
-  std::vector<Texture> load_material_textures(aiMaterial* material,
-                                              aiTextureType type);
+  std::vector<std::shared_ptr<Texture>> load_material_textures(
+      aiMaterial* material, aiTextureType type);
 };

@@ -2,8 +2,6 @@
 #include <GLFW/glfw3.h>
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 #include <array>
 #include <glm/glm.hpp>
@@ -13,6 +11,7 @@
 
 #include "camera.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 float delta_time{0.0F};
 float last_frame{0.0F};
@@ -153,10 +152,8 @@ int main() {
                         (const void*)0);
   glEnableVertexAttribArray(0);
 
-  const unsigned int diffuse_map =
-      load_texture("resources/textures/container2.png");
-  const unsigned int specular_map =
-      load_texture("resources/textures/container2_specular.png");
+  const Texture diffuse_map{"resources/textures/container2.png"};
+  const Texture specular_map{"resources/textures/container2_specular.png"};
 
   shader.use();
   shader.set_int("material.diffuse", 0);
@@ -200,10 +197,10 @@ int main() {
     shader.set_mat4("projection", projection);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuse_map);
+    diffuse_map.bind();
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, specular_map);
+    specular_map.bind();
 
     glBindVertexArray(cube_vao);
     for (int i = 0; i < 10; i++) {
@@ -221,8 +218,6 @@ int main() {
   glDeleteVertexArrays(1, &cube_vao);
   glDeleteVertexArrays(1, &light_cube_vao);
   glDeleteBuffers(1, &vbo);
-  glDeleteTextures(1, &specular_map);
-  glDeleteTextures(1, &diffuse_map);
 
   glfwTerminate();
   return 0;
@@ -265,41 +260,4 @@ void mouse_callback(GLFWwindow*, double xpos, double ypos) {
 
 void scroll_callback(GLFWwindow*, double, double yoffset) {
   camera.process_mouse_scroll(static_cast<float>(yoffset));
-}
-
-unsigned int load_texture(const char* path) {
-  unsigned int texture = 0;
-  glGenTextures(1, &texture);
-
-  int width = 0;
-  int height = 0;
-  int nr_components = 0;
-
-  unsigned char* data = stbi_load(path, &width, &height, &nr_components, 0);
-  if (data != nullptr) {
-    GLenum format = 0;
-    if (nr_components == 1) {
-      format = GL_RED;
-    } else if (nr_components == 3) {
-      format = GL_RGB;
-    } else if (nr_components == 4) {
-      format = GL_RGBA;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(format), width, height, 0,
-                 format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                    GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  } else {
-    std::cerr << "Failed to load texture\n";
-  }
-
-  stbi_image_free(data);
-  return texture;
 }
